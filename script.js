@@ -5,8 +5,18 @@ const longoBt = document.querySelector(".app__card-button--longo");
 const banner = document.querySelector(".app__image");
 const titulo = document.querySelector(".app__title");
 const botoes = document.querySelectorAll(".app__card-button");
+const startPauseBt = document.querySelector("#start-pause");
 const musicaFocoInput = document.querySelector("#alternar-musica");
+const iniciarOuPausarBt = document.querySelector("#start-pause span");
+
 const musica = new Audio("/sons/luna-rise-part-one.mp3");
+const audioPlay = new Audio("/sons/play.wav");
+const audioPausa = new Audio("/sons/pause.mp3");
+const audioTempoFinalizado = new Audio("/sons/beep.mp3");
+
+let tempoDecorridoEmSegundos = 5;
+let intervaloId = null;
+
 musica.loop = true;
 
 musicaFocoInput.addEventListener("change", () => {
@@ -15,6 +25,21 @@ musicaFocoInput.addEventListener("change", () => {
   } else {
     musica.pause();
   }
+});
+
+focoBt.addEventListener("click", () => {
+  alteraContexto("foco");
+  focoBt.classList.add("active");
+});
+
+curtoBt.addEventListener("click", () => {
+  alteraContexto("descanso-curto");
+  curtoBt.classList.add("active");
+});
+
+longoBt.addEventListener("click", () => {
+  alteraContexto("descanso-longo");
+  longoBt.classList.add("active");
 });
 
 function alteraContexto(contexto) {
@@ -45,17 +70,31 @@ function alteraContexto(contexto) {
   }
 }
 
-focoBt.addEventListener("click", () => {
-  alteraContexto("foco");
-  focoBt.classList.add("active");
-});
+const contagemRegressiva = () => {
+  if (tempoDecorridoEmSegundos <= 0) {
+    audioTempoFinalizado.play();
+    alert("Tempo finalizado!");
+    zerar();
+    return;
+  }
 
-curtoBt.addEventListener("click", () => {
-  alteraContexto("descanso-curto");
-  curtoBt.classList.add("active");
-});
+  tempoDecorridoEmSegundos -= 1;
+  console.log(tempoDecorridoEmSegundos);
+};
 
-longoBt.addEventListener("click", () => {
-  alteraContexto("descanso-longo");
-  longoBt.classList.add("active");
-});
+startPauseBt.addEventListener("click", iniciarOuPausar);
+
+function iniciarOuPausar() {
+  if (intervaloId) {
+    audioPausa.play();
+    zerar();
+    return;
+  }
+  audioPlay.play();
+  intervaloId = setInterval(contagemRegressiva, 1000);
+}
+
+function zerar() {
+  clearInterval(intervaloId);
+  intervaloId = null;
+}
